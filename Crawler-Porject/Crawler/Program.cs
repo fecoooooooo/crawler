@@ -3,11 +3,15 @@ using CsvHelper.Configuration;
 using HtmlAgilityPack;
 using System.Formats.Asn1;
 using System.Globalization;
+using System.Runtime.CompilerServices;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Net.WebRequestMethods;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using File = System.IO.File;
 
 class Program
 {
@@ -17,9 +21,13 @@ class Program
 	static readonly string[] TAGS = { "pixelated", "stylized" };
 	static readonly double MIN_RATING = 3.5;
 
+	static readonly string savePath = @"..\..\..\..\Data";
+	static readonly string saveFileName = "save.json";
+
 	static void Main(string[] args)
 	{
-		Console.CancelKeyPress += Console_CancelKeyPress;
+		LoadIfPossible();
+
 		AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
 		urlsToVisit.Enqueue("https://play.google.com/store/apps/details?id=cc.peacedeath.peacedeath&hl=en_US");
 
@@ -44,13 +52,13 @@ class Program
 
 			visitedUrls.Add(currentUrl);
 		}
+
 		WriteCSW();
 	}
 
 	private static void CurrentDomain_ProcessExit(object? sender, EventArgs e)
 	{
-		throw new Exception("das");
-
+		Save();
 	}
 
 	private static bool OverMinRating(HtmlDocument document, double minRating)
@@ -153,13 +161,47 @@ class Program
 			var csvString = writer.ToString();
 			
 			string path = @"..\result.txt";
-			System.IO.File.WriteAllText(path, csvString);
+			File.WriteAllText(path, csvString);
 		}
-
 
 		throw new Exception("Egyedi emailcimekre szures, ne menjen el ugynaza az uzenet 2x");
 	}
-	
+
+	private static void Save()
+	{
+		if (!Directory.Exists(savePath))
+			Directory.CreateDirectory(savePath);
+
+		SaveData saveData = new SaveData()
+		{
+			visitedUrls = visitedUrls,
+			urlsToVisit = urlsToVisit,
+			allContacts = allContacts,
+		};
+
+		string jsonString = JsonSerializer.Serialize(saveData);
+
+		string saveFilePath = Path.Combine(savePath, saveFileName);
+		File.WriteAllText(saveFilePath, jsonString);
+	}
+
+	private static void LoadIfPossible()
+	{
+		string saveFilePath = Path.Combine(savePath, saveFileName);
+
+		if (File.Exists(saveFilePath))
+		{
+			var jsonString = File.ReadAllText(saveFilePath);
+			object? savedObj = JsonSerializer.Deserialize(jsonString, typeof(SaveData));
+			if(savedObj is SaveData)
+			{
+				SaveData saveData = (SaveData)savedObj;
+				visitedUrls = saveData.visitedUrls;
+				urlsToVisit = saveData.urlsToVisit;
+				allContacts = saveData.allContacts;
+			}
+		}
+	}
 }
 
 class Contact
@@ -170,6 +212,7 @@ class Contact
 	public string Email { get; set; } = null!;
 }
 
+[Serializable]
 class SaveData
 {
 	public HashSet<string> visitedUrls { get; set; } = null!;
