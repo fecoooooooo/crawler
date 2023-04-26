@@ -19,7 +19,8 @@ class Program
 
 	static void Main(string[] args)
 	{
-		// Start by adding the initial URL to the queue
+		Console.CancelKeyPress += Console_CancelKeyPress;
+		AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
 		urlsToVisit.Enqueue("https://play.google.com/store/apps/details?id=cc.peacedeath.peacedeath&hl=en_US");
 
 		while (urlsToVisit.Count > 0)
@@ -44,6 +45,12 @@ class Program
 			visitedUrls.Add(currentUrl);
 		}
 		WriteCSW();
+	}
+
+	private static void CurrentDomain_ProcessExit(object? sender, EventArgs e)
+	{
+		throw new Exception("das");
+
 	}
 
 	private static bool OverMinRating(HtmlDocument document, double minRating)
@@ -161,4 +168,11 @@ class Contact
 	public string StudioName { get; set; } = null!;
 	public string GameName { get; set; } = null!;
 	public string Email { get; set; } = null!;
+}
+
+class SaveData
+{
+	public HashSet<string> visitedUrls { get; set; } = null!;
+	public Queue<string> urlsToVisit { get; set; } = null!;
+	public List<Contact> allContacts { get; set; } = null!;
 }
