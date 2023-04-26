@@ -1,16 +1,10 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
 using HtmlAgilityPack;
-using System.Formats.Asn1;
+using System.Diagnostics;
 using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Net.WebRequestMethods;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using File = System.IO.File;
 
 class Program
@@ -19,7 +13,7 @@ class Program
 	static Queue<string> urlsToVisit = new Queue<string>();
 	static List<Contact> allContacts = new List<Contact>();
 	static readonly string[] TAGS = { "pixelated", "stylized" };
-	static readonly double MIN_RATING = 3.5;
+	static readonly double MIN_RATING = 4.5;
 
 	static readonly string savePath = @"..\..\..\..\Data";
 	static readonly string saveFileName = "save.json";
@@ -48,7 +42,7 @@ class Program
 			ExtractLinks(document);
 
 			if(ContainsTags(document) && OverMinRating(document, MIN_RATING))
-				ExtractContacts(document);
+				ExtractContacts(document, currentUrl);
 
 			visitedUrls.Add(currentUrl);
 		}
@@ -63,29 +57,34 @@ class Program
 
 	private static bool OverMinRating(HtmlDocument document, double minRating)
 	{
+		return GetRating(document).HasValue && minRating <= GetRating(document)!.Value;
+	}
+
+	private static double? GetRating(HtmlDocument document)
+	{
 		var ratingNode = document.DocumentNode.SelectSingleNode($"//div[contains(@aria-label,'stars out of five stars')]");
-		if(ratingNode != null)
+		if (ratingNode != null)
 		{
 			var ratingString = ratingNode.Attributes["aria-label"].Value;
 
 			Regex regex = new Regex(@"\d+(\.\d+)?");
 			Match match = regex.Match(ratingString);
 			string value = match.Value;
-			double number = double.Parse(value);
+			double rating = double.Parse(value);
 
-			if(minRating <= number)
-				return true;
+			return rating;
 		}
 
-		return false;
+		return null;
 	}
 
 	private static void AddConsoleUI(string currentUrl)
 	{
-		Console.Clear();
+		Console.SetCursorPosition(0, 0);
 		Console.WriteLine("Scanned:" + visitedUrls.Count);
 		Console.WriteLine("Remaining: " + urlsToVisit.Count);
-		Console.WriteLine("Current: " + currentUrl);
+		Console.WriteLine("Contacts found: " + allContacts.Count);
+		Console.WriteLine("Current URL: " + currentUrl);
 	}
 
 	private static bool ContainsTags(HtmlDocument document)
@@ -122,13 +121,12 @@ class Program
 		{
 			string hrefValue = linkNode.Attributes["href"].Value;
 			hrefValue = "https://play.google.com" + hrefValue;
-			//Console.WriteLine(hrefValue);
 			
 			urlsToVisit.Enqueue(hrefValue);
 		}
 	}
 
-	private static void ExtractContacts(HtmlDocument document)
+	private static void ExtractContacts(HtmlDocument document, string currentUrl)
 	{
 		Contact contact = new Contact();
 
@@ -144,7 +142,38 @@ class Program
 		if(gameName != null)
 			contact.GameName = gameName.ChildNodes[0].InnerHtml;
 
+		contact.Rating = GetRating(document);
+		contact.ReviewCount = GetReviewCount(document);
+		contact.Url = currentUrl;
+
 		allContacts.Add(contact);
+	}
+	private static double? GetReviewCount(HtmlDocument document)
+	{
+		var ratingNode = document.DocumentNode.SelectSingleNode($"//div[contains(text(),'reviews')]");
+		if (ratingNode != null && 2 <= ratingNode.ParentNode.ChildNodes.Count )
+		{
+			var reviewCountNode = ratingNode.ParentNode.ChildNodes[1];
+			var reviewCountText = reviewCountNode.InnerText.Split(' ')[0];
+
+			int multiplier = 1;
+			if (reviewCountText[reviewCountText.Length - 1] == 'K')
+			{
+				multiplier = 1000;
+				reviewCountText = reviewCountText.Substring(0, reviewCountText.Length - 1);
+			}
+			else if (reviewCountText[reviewCountText.Length - 1] == 'M')
+			{
+				multiplier = 1000000;
+				reviewCountText = reviewCountText.Substring(0, reviewCountText.Length - 1);
+			}
+
+			double reviewCount = double.Parse(reviewCountText) * multiplier;
+
+			return reviewCount;
+		}
+
+		return null;
 	}
 
 	private static void WriteCSW()
@@ -179,7 +208,7 @@ class Program
 			allContacts = allContacts,
 		};
 
-		string jsonString = JsonSerializer.Serialize(saveData);
+		string jsonString = JsonSerializer.Serialize(saveData, new JsonSerializerOptions { WriteIndented = true });
 
 		string saveFilePath = Path.Combine(savePath, saveFileName);
 		File.WriteAllText(saveFilePath, jsonString);
@@ -210,6 +239,8 @@ class Contact
 	public string StudioName { get; set; } = null!;
 	public string GameName { get; set; } = null!;
 	public string Email { get; set; } = null!;
+	public double? Rating { get; set; }
+	public double? ReviewCount { get; set; }
 }
 
 [Serializable]
