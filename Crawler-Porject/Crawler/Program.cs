@@ -20,34 +20,42 @@ class Program
 
 	static void Main(string[] args)
 	{
-		LoadIfPossible();
-
-		AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
-		urlsToVisit.Enqueue("https://play.google.com/store/apps/details?id=cc.peacedeath.peacedeath&hl=en_US");
-
-		while (urlsToVisit.Count > 0)
+		try
 		{
-			string currentUrl = urlsToVisit.Dequeue();
+			LoadIfPossible();
 
-			AddConsoleUI(currentUrl);
+			AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
+			urlsToVisit.Enqueue("https://play.google.com/store/apps/details?id=cc.peacedeath.peacedeath&hl=en_US");
 
-			if (visitedUrls.Contains(currentUrl))
-				continue;
+			while (urlsToVisit.Count > 0)
+			{
+				string currentUrl = urlsToVisit.Dequeue();
 
-			string htmlContent = DownloadHtmlContent(currentUrl);
+				AddConsoleUI(currentUrl);
 
-			HtmlDocument document = new HtmlDocument();
-			document.LoadHtml(htmlContent);
+				if (visitedUrls.Contains(currentUrl))
+					continue;
 
-			ExtractLinks(document);
+				string htmlContent = DownloadHtmlContent(currentUrl);
 
-			if(ContainsTags(document) && OverMinRating(document, MIN_RATING))
-				ExtractContacts(document, currentUrl);
+				HtmlDocument document = new HtmlDocument();
+				document.LoadHtml(htmlContent);
 
-			visitedUrls.Add(currentUrl);
+				ExtractLinks(document);
+
+				if (ContainsTags(document) && OverMinRating(document, MIN_RATING))
+					ExtractContacts(document, currentUrl);
+
+				visitedUrls.Add(currentUrl);
+			}
+
+			WriteCSW();
 		}
-
-		WriteCSW();
+		catch
+		{
+			Save();
+		}
+		Console.ReadKey();
 	}
 
 	private static void CurrentDomain_ProcessExit(object? sender, EventArgs e)
@@ -104,7 +112,7 @@ class Program
 		using (HttpClient client = new HttpClient())
 		{
 			HttpResponseMessage response = client.GetAsync(url).Result;
-			response.EnsureSuccessStatusCode();
+			//response.EnsureSuccessStatusCode();
 
 			string htmlContent = response.Content.ReadAsStringAsync().Result;
 			return htmlContent;
