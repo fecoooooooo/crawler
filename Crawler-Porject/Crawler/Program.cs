@@ -1,4 +1,5 @@
-﻿using CsvHelper;
+﻿using Crawler;
+using CsvHelper;
 using CsvHelper.Configuration;
 using HtmlAgilityPack;
 using System.Diagnostics;
@@ -14,9 +15,6 @@ class Program
 	static List<Contact> allContacts = new List<Contact>();
 	static readonly string[] TAGS = { "pixelated", "stylized" };
 	static readonly double MIN_RATING = 4.5;
-
-	static readonly string savePath = @"..\..\..\..\Data";
-	static readonly string saveFileName = "save.json";
 
 	static void Main(string[] args)
 	{
@@ -206,8 +204,8 @@ class Program
 
 	private static void Save()
 	{
-		if (!Directory.Exists(savePath))
-			Directory.CreateDirectory(savePath);
+		if (!Directory.Exists(SaveData.SAVE_PATH))
+			Directory.CreateDirectory(SaveData.SAVE_PATH);
 
 		SaveData saveData = new SaveData()
 		{
@@ -218,13 +216,13 @@ class Program
 
 		string jsonString = JsonSerializer.Serialize(saveData, new JsonSerializerOptions { WriteIndented = true });
 
-		string saveFilePath = Path.Combine(savePath, saveFileName);
+		string saveFilePath = Path.Combine(SaveData.SAVE_PATH, SaveData.SAVE_FILENAME);
 		File.WriteAllText(saveFilePath, jsonString);
 	}
 
 	private static void LoadIfPossible()
 	{
-		string saveFilePath = Path.Combine(savePath, saveFileName);
+		string saveFilePath = Path.Combine(SaveData.SAVE_PATH, SaveData.SAVE_FILENAME);
 
 		if (File.Exists(saveFilePath))
 		{
@@ -241,20 +239,4 @@ class Program
 	}
 }
 
-class Contact
-{
-	public string Url { get; set; } = null!;
-	public string StudioName { get; set; } = null!;
-	public string GameName { get; set; } = null!;
-	public string Email { get; set; } = null!;
-	public double? Rating { get; set; }
-	public double? ReviewCount { get; set; }
-}
 
-[Serializable]
-class SaveData
-{
-	public HashSet<string> visitedUrls { get; set; } = null!;
-	public Queue<string> urlsToVisit { get; set; } = null!;
-	public List<Contact> allContacts { get; set; } = null!;
-}

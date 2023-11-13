@@ -5,6 +5,10 @@ VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Crawler", "Crawler\Crawler.csproj", "{128501A3-86C6-44BF-9E8C-2987E9D4C4FE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailSender", "EmailSender\EmailSender.csproj", "{55BD661C-D461-4C65-A5B3-958EF69553EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContactFormatter", "ContactFormatter\ContactFormatter.csproj", "{BA7DE321-2E9F-41E6-A8C9-DE6045012C7E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{128501A3-86C6-44BF-9E8C-2987E9D4C4FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{128501A3-86C6-44BF-9E8C-2987E9D4C4FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{128501A3-86C6-44BF-9E8C-2987E9D4C4FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55BD661C-D461-4C65-A5B3-958EF69553EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55BD661C-D461-4C65-A5B3-958EF69553EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55BD661C-D461-4C65-A5B3-958EF69553EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55BD661C-D461-4C65-A5B3-958EF69553EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA7DE321-2E9F-41E6-A8C9-DE6045012C7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA7DE321-2E9F-41E6-A8C9-DE6045012C7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA7DE321-2E9F-41E6-A8C9-DE6045012C7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA7DE321-2E9F-41E6-A8C9-DE6045012C7E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

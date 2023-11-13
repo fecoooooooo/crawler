@@ -1,0 +1,16 @@
+Hey <name>,
+
+I wanted to share with you how much I enjoyed the <game> that you developed, which I found on Google Play. I really love the art style used in the game.
+
+Allow me to introduce myself. My name is Ferenc Dajka, and I am from Hungary (and no, I definitely do not agree with our Prime Minister :P, in case you were wondering). I am a programmer myself and am really into game programming. I am currently looking for job opportunities, and I believe that I could be a good fit for developing games like yours. I was wondering if there are any job openings at your company.
+
+Here are some of my qualifications:
+- I have game development experience and have previously worked for Kite Games Ltd (https://kite-games.com/), where we developed Sudden Strike 4.
+- I have been working as a programmer for 10 years now.
+- I have a Master's degree in Computer Science, and my thesis was also related to game development.
+- I have some experience in mobile game development and helped in the release of some games in the past.
+
+If you don't have any current job openings, could you possibly recommend any other places where I can find such opportunities?
+
+Best regards,
+Ferenc Dajka
